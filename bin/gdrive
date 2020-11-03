@@ -1,0 +1,41 @@
+#!/usr/bin/env ruby
+
+require 'pry'
+require 'json'
+begin
+  require_relative '../.rubylib/gdrive'
+rescue LoadError
+  abort "You need to install the google_drive gem first."
+end
+
+CREDENTIALS_FILE_PATH = File.expand_path('~/.gdrive.json')
+CLI.ensure_credentials_file(CREDENTIALS_FILE_PATH)
+
+cli = CLI.build(CREDENTIALS_FILE_PATH)
+
+case ARGV.shift
+when 'list', 'ls'   then cli.command_list(ARGV.first)
+when 'find'         then cli.command_find(ARGV.first)
+when 'search'       then cli.command_search(ARGV.first)
+when 'cat'          then cli.command_cat(ARGV.first)
+when 'download'     then cli.command_download(*ARGV[0..2])
+when 'upload'       then cli.command_upload(*ARGV[0..2])
+when 'mkdir'        then cli.command_mkdir(ARGV.first)
+when 'remove', 'rm' then cli.command_remove(ARGV.first)
+else
+  puts eval("\"#{DATA.read}\"")
+end
+
+__END__
+#{`tput setaf 9`}Usage:#{`tput sgr0`}
+
+#{`tput setaf 10`}#{File.basename($0)} ls [path]#{`tput sgr0`} List given path. If no path is given, root is assummed.
+#{`tput setaf 10`}#{File.basename($0)} find [path]#{`tput sgr0`} List given path recursively. If no path is given, root is assummed.
+#{`tput setaf 10`}#{File.basename($0)} search [title]#{`tput sgr0`} Look for file title.
+
+#{`tput setaf 11`}#{File.basename($0)} mkdir [path]#{`tput sgr0`} Create a directory.
+#{`tput setaf 11`}#{File.basename($0)} download [path]#{`tput sgr0`} Download a file.
+#{`tput setaf 11`}#{File.basename($0)} upload [local path] [remote path]#{`tput sgr0`} Upload file into a remote path.
+#{`tput setaf 11`}#{File.basename($0)} cat [path]#{`tput sgr0`} Print out remote file.
+
+#{`tput setaf 9`}#{File.basename($0)} remove [remote path]#{`tput sgr0`} Delete remote file.
