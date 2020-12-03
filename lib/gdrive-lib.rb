@@ -1,5 +1,6 @@
 require 'google_drive'
 
+# TODO: double upload shouldn't be possible (same file name), but is is now.
 class CLI
   class InvalidPathError < StandardError
   end
@@ -14,11 +15,11 @@ class CLI
   # This has to be a file, so it can be updated with scope and refresh token (automatically).
   def self.ensure_credentials_file(credentials_file_path)
     unless File.file?(credentials_file_path)
+      id = ENV.fetch('GDRIVE_CLIENT_ID')
+      secret = ENV.fetch('GDRIVE_CLIENT_SECRET')
+
       File.open(credentials_file_path, 'w') do |file|
-        file.puts({
-      client_id: ENV.fetch('GDRIVE_CLIENT_ID'),
-      client_secret: ENV.fetch('GDRIVE_CLIENT_SECRET')
-    }.to_json)
+        file.puts({client_id: id, client_secret: secret}.to_json)
       end
     end
   end
@@ -88,16 +89,37 @@ class CLI
     puts
   end
 
-  def command_upload(local_path, remote_path)
-    remote_path ||= "/#{File.basename(local_path)}"
+  # Upload to WIP:
+  # upload song.mp3 song2.mp3
+  # upload song.mp3 song2.mp3 -- songs
+  def command_upload(*args)
+    if separator_index = args.index('--')
+      local_paths = args[0..(separator_index - 1)]
+      remote_paths = args[(separator_index + 1)..-1]
+      if remote_path.length != 1
+        abort "x"
+      end
+      remote_path = remote_paths.first
+    else
+      local_paths = args
+      remote_path = local_paths.length == 1 ? local_paths.first : 'WIP'
+    end
+    require 'pry'; binding.pry ###
+local_path, remote_path = "/#{File.basename(local_path)}"
+    # If path is given as relative, File.dirname(remote_path) returns '.' and
+    # self.find_file returns nil.
+    remote_path = "/#{remote_path}" unless remote_path.start_with?('/')
+
     puts "~ Uploading '#{local_path}' to #{remote_path}"
-    @session.upload_from_file(local_path, remote_path, convert: false)
+    file = @session.upload_from_file(local_path, File.basename(remote_path), convert: false)
+
     # File is always uploaded to the root_collection by default.
-    # Do:
-    # file = @session.upload_from_file(ruta, file, convert: false)
-    # folder.add(file)
-    # @session.root_collection.remove(file)
     # https://github.com/gimite/google-drive-ruby/issues/260
+    unless self.find_file(File.dirname(remote_path)) == @session.root_collection
+      require 'pry'; binding.pry ###
+      self.find_file(File.dirname(remote_path)).add(file)
+      @session.root_collection.remove(file)
+    end
   rescue Interrupt
     puts
   end

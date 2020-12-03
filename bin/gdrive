@@ -3,7 +3,7 @@
 require 'pry'
 require 'json'
 begin
-  require_relative '../.rubylib/gdrive'
+  require_relative '../lib/gdrive-lib'
 rescue LoadError
   abort "You need to install the google_drive gem first."
 end
@@ -19,7 +19,7 @@ when 'find'         then cli.command_find(ARGV.first)
 when 'search'       then cli.command_search(ARGV.first)
 when 'cat'          then cli.command_cat(ARGV.first)
 when 'download'     then cli.command_download(*ARGV[0..2])
-when 'upload'       then cli.command_upload(*ARGV[0..2])
+when 'upload'       then cli.command_upload(*ARGV)
 when 'mkdir'        then cli.command_mkdir(ARGV.first)
 when 'remove', 'rm' then cli.command_remove(ARGV.first)
 else
@@ -35,7 +35,7 @@ __END__
 
 #{`tput setaf 11`}#{File.basename($0)} mkdir [path]#{`tput sgr0`} Create a directory.
 #{`tput setaf 11`}#{File.basename($0)} download [path]#{`tput sgr0`} Download a file.
-#{`tput setaf 11`}#{File.basename($0)} upload [local path] [remote path]#{`tput sgr0`} Upload file into a remote path.
+#{`tput setaf 11`}#{File.basename($0)} upload [local paths] [remote path]#{`tput sgr0`} Upload file(s) into a remote path. Remote path doesn't have to exist yet, but its dirname has to exist.
 #{`tput setaf 11`}#{File.basename($0)} cat [path]#{`tput sgr0`} Print out remote file.
 
 #{`tput setaf 9`}#{File.basename($0)} remove [remote path]#{`tput sgr0`} Delete remote file.
