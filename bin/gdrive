@@ -1,17 +1,12 @@
 #!/usr/bin/env ruby
 
 require 'pry'
-require 'json'
-begin
-  require_relative '../lib/gdrive-lib'
-rescue LoadError
-  abort "You need to install the google_drive gem first."
-end
+require 'gdrive-cli'
 
 CREDENTIALS_FILE_PATH = File.expand_path('~/.gdrive.json')
-CLI.ensure_credentials_file(CREDENTIALS_FILE_PATH)
+GDriveCLI::API.ensure_credentials_file(CREDENTIALS_FILE_PATH)
 
-cli = CLI.build(CREDENTIALS_FILE_PATH)
+cli = GDriveCLI::CLI.new(GDriveCLI::API.build(CREDENTIALS_FILE_PATH))
 
 case ARGV.shift
 when 'list', 'ls'   then cli.command_list(ARGV.first)
