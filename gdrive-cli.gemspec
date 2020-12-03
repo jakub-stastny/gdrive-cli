@@ -1,6 +1,6 @@
 Gem::Specification.new do |spec|
   spec.name = 'gdrive-cli'
-  spec.version = '0.0.1'
+  spec.version = '0.0.2'
   spec.license = 'MIT' # Just so gem build would shut up. Use it however you like.
 
   spec.summary = "Manage your Google Drive from command line"
