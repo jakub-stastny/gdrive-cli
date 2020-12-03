@@ -9,4 +9,6 @@ Gem::Specification.new do |spec|
 
   spec.files = Dir["{lib,spec}/**/*.rb"] + Dir["bin/*"] + ['Gemfile', 'Gemfile.lock', 'README.md', 'gdrive-cli.gemspec']
   spec.executables << 'gdrive'
+
+  spec.add_dependency 'google_drive', '~> 3'
 end
