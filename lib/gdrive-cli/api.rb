@@ -57,6 +57,27 @@ module GDriveCLI
       end
     end
 
+    def upload(local_paths, remote_path)
+      # local_path, remote_path = "/#{File.basename(local_path)}"
+      # If path is given as relative, File.dirname(remote_path) returns '.' and
+      # self.find_file returns nil.
+      remote_path = "/#{remote_path}" unless remote_path.start_with?('/')
+
+      local_paths.each do |local_path|
+        puts "~ Uploading '#{local_path}' to #{remote_path}"
+        # file = @session.upload_from_file(local_path, File.basename(remote_path), convert: false)
+        file = @session.upload_from_file(local_path, File.basename(local_path), convert: false)
+
+        # File is always uploaded to the root_collection by default.
+        # https://github.com/gimite/google-drive-ruby/issues/260
+        unless self.find_file(File.dirname(remote_path)) == @session.root_collection
+          require 'pry'; binding.pry ###
+          self.find_file(File.dirname(remote_path)).add(file)
+          @session.root_collection.remove(file)
+        end
+      end
+    end
+
     protected
     def get_collection(destination)
       result = destination.nil? || destination == '/' ? @session.root_collection : self.find_file(destination.sub(/^\//, ''))
